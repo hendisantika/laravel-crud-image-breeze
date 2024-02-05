@@ -31,9 +31,26 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request): RedirectResponse
     {
-        //
+        $validated = $request->validated();
+
+        if ($request->hasFile('featured_image')) {
+            // put image in the public storage
+            $filePath = Storage::disk('public')->put('images/posts/featured-images', request()->file('featured_image'));
+            $validated['featured_image'] = $filePath;
+        }
+
+        // insert only requests that already validated in the StoreRequest
+        $create = Post::create($validated);
+
+        if ($create) {
+            // add flash for the success notification
+            session()->flash('notif.success', 'Post created successfully!');
+            return redirect()->route('posts.index');
+        }
+
+        return abort(500);
     }
 
     /**
