@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class PostController extends Controller
@@ -77,9 +76,27 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateRequest $request, string $id): RedirectResponse
     {
-        //
+        $post = Post::findOrFail($id);
+        $validated = $request->validated();
+
+        if ($request->hasFile('featured_image')) {
+            // delete image
+            Storage::disk('public')->delete($post->featured_image);
+
+            $filePath = Storage::disk('public')->put('images/posts/featured-images', request()->file('featured_image'), 'public');
+            $validated['featured_image'] = $filePath;
+        }
+
+        $update = $post->update($validated);
+
+        if ($update) {
+            session()->flash('notif.success', 'Post updated successfully!');
+            return redirect()->route('posts.index');
+        }
+
+        return abort(500);
     }
 
     /**
