@@ -3,15 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class PostController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(): Response
     {
-        //
+        return response()->view('posts.index', [
+            'posts' => Post::orderBy('updated_at', 'desc')->get(),
+        ]);
     }
 
     /**
