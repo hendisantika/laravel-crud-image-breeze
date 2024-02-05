@@ -102,8 +102,19 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): RedirectResponse
     {
-        //
+        $post = Post::findOrFail($id);
+
+        Storage::disk('public')->delete($post->featured_image);
+
+        $delete = $post->delete($id);
+
+        if ($delete) {
+            session()->flash('notif.success', 'Post deleted successfully!');
+            return redirect()->route('posts.index');
+        }
+
+        return abort(500);
     }
 }
